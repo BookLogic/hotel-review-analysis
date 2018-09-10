@@ -1,0 +1,56 @@
+import twython #actively maintained, pure Python wrapper for the Twitter API
+import pandas as pd #in order to read the CSV file
+import numpy as np #for mathematic and conditions
+import nltk #download VADER library
+nltk.download('vader_lexicon')
+from nltk.sentiment.vader import SentimentIntensityAnalyzer #importing the sentiment analysis tool
+
+
+#read Hotel Reviews file
+HotelReview = pd.read_csv('C:\Users\pamel\Desktop\College Papers\Data Analytics\\Hotel_Reviews_Fixed2.csv')
+
+
+#set up conditions to classify the reviews
+Conditions = [((HotelReview['Lower_Positive'] == 'everything') & (HotelReview['Lower_Negative'] == 'no negative')) |
+              ((HotelReview['Lower_Positive'] == 'everything') & (HotelReview['Lower_Negative'] == 'nothing')),
+              ((HotelReview['Lower_Negative'] == 'everything') & (HotelReview['Lower_Positive'] == 'no positive')) |
+              ((HotelReview['Lower_Negative'] == 'everything') & (HotelReview['Lower_Positive'] == 'nothing')),
+              (HotelReview['Lower_Negative'] == 'no negative') | (HotelReview['Lower_Negative'] == 'nothing'),
+              (HotelReview['Lower_Positive'] == 'no positive') | (HotelReview['Lower_Positive'] == 'nothing')]
+
+
+#set up choices for the conditions
+Choices1 = [1, 2, 3, 4]
+
+
+#apply conditions and choices on the Hotel Review data
+HotelReview['Review_Count'] = np.select(Conditions, Choices1, default=5)
+
+
+#link the Vader sentiment intensity analyzer
+sid = SentimentIntensityAnalyzer()
+
+
+#create a sentiment analyze function
+def SentimentAnalyze():
+   for i,count in enumerate(HotelReview['Review_Count']):
+       if count == 1:
+           HotelReview.loc[i,'Review_Sentiment_Score'] = 1 #return 1 for review count 1
+       elif count == 2:
+           HotelReview.loc[i, 'Review_Sentiment_Score'] = -1 #return -1 for review count 2
+       elif count == 3:
+           review = HotelReview.loc[i,'Positive_Review']
+           HotelReview.loc[i, 'Review_Sentiment_Score'] = sid.polarity_scores(review)['compound'] #return compound score for review count 3
+       elif count == 4:
+           review = HotelReview.loc[i,'Negative_Review']
+           HotelReview.loc[i, 'Review_Sentiment_Score'] = sid.polarity_scores(review)['compound'] #return compound score for review count 4
+       else:
+           review = HotelReview.loc[i,'Negative_Review'] + ' ' + HotelReview.loc[i,'Positive_Review']
+           HotelReview.loc[i, 'Review_Sentiment_Score'] = sid.polarity_scores(review)['compound'] #return compound score for review count 5
+
+
+#apply the function
+SentimentAnalyze()
+
+#save the data as new CSV file
+HotelReview.to_csv('C:\Users\pamel\Desktop\College Papers\Data Analytics\\Hotel_Review_Final.csv', encoding='utf-8')
