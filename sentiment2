@@ -1,0 +1,47 @@
+import matplotlib.pyplot as plt #show the plot
+import pandas as pd #in order to read the CSV file and use correlation
+import seaborn as sns #create a plot
+
+
+#read Hotel Reviews file
+HotelReview = pd.read_csv('C:\Users\pamel\Desktop\College Papers\Data Analytics\\Hotel_Review_Final.csv')
+
+
+#create x and y axis
+x = HotelReview['Review_Sentiment_Score']
+y = HotelReview['Reviewer_Score']
+
+
+sns.distplot(x)
+plt.show()
+
+sns.distplot(y)
+plt.show()
+
+
+#create a kde plot
+g = sns.jointplot(x, y, data=HotelReview, kind="kde", xlim=(-0.5,1.15), ylim=(6.5,11))
+plt.show()
+
+
+import matplotlib.pyplot as plt #show the plot
+import pandas as pd #in order to read the CSV file and use correlation
+import seaborn as sns #create a plot
+
+
+#read Hotel Reviews file
+HotelReview = pd.read_csv('C:\Users\pamel\Desktop\College Papers\Data Analytics\\Hotel_Review_Final.csv')
+
+
+#group by each nation and get mean of review sentiment score an reviewer score
+HotelReview2 = HotelReview.groupby('Reviewer_Nationality')[['Review_Sentiment_Score','Reviewer_Score']].mean()
+
+
+#create x and y axis
+x = HotelReview2['Review_Sentiment_Score']
+y = HotelReview2['Reviewer_Score']
+
+
+#create an hexbin plot
+g = sns.jointplot(x, y, data=HotelReview2, kind="hex", color="b", xlim=(-0.75,1), ylim=(4,10.5))
+plt.show()
